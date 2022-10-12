@@ -4,6 +4,9 @@
 
 using namespace std;
 
+int N;
+int n;
+
 int main (int argc, char *argv[]) {
 
     if (argc != 2) {
@@ -12,7 +15,7 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
-    int N = atoi(argv[1]);
+    N = atoi(argv[1]);
 
     if (N<4) {
         cout << "Unesen je broj manji od broja 4! Morate unjeti broj veci od broja 3.\n";
@@ -24,7 +27,6 @@ int main (int argc, char *argv[]) {
     cout << "Tijekom igre mozete povlaciti jednu, dvije ili tri sibice.\n";
     
     bool igrac_a = true;
-    int n;
 
     do {
             if (igrac_a) {
