@@ -1,5 +1,5 @@
 #include<iostream>
-#include<cstdlib> // Uporaba atoi funkcije
+#include<cstdlib>
 #include<signal.h>
 
 using namespace std;
@@ -12,7 +12,6 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
-//    int M = 3;
     int N = atoi(argv[1]);
 
     if (N<4) {
@@ -30,35 +29,30 @@ int main (int argc, char *argv[]) {
     do {
             if (igrac_a) {
         cout << "Zigica na stolu: " << N << ". Na redu igrac A.\n";
-
         cout << "Zigica igrac A uzeo sa stola\n";
-        cin >> n;
-
+        do {
+            cin >> n;
+        } while (n<1 || n>3 || n>N);
         N = N - n;
-
-
         }  else {
         cout << "Zigica na stolu: " << N << ". Na redu igrac B.\n";
-
         cout << "Zigica igrac B uzeo sa stola\n";
-        cin >> n;
-
+        do {
+            cin >> n;
+        } while (n<1 || n>3 || n>N);
         N = N - n;
-
-       
-
-
         }
     igrac_a = !igrac_a;
-
-
-
     } while (N>0);
 
-
-
-  
-
+    if (N<1) {
+        cout << "Ostalo je " << N << " zigica na stolu.\n";
+    if (igrac_a) {
+        cout << "Pobjednik je igrac A\n";
+        }
+    else {
+        cout << "Pobjednik je igrac B\n";
+        }
+    }
     return 0;
-
 }
