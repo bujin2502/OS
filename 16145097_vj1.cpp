@@ -23,8 +23,8 @@ int main (int argc, char *argv[]) {
     }
 
     cout << "Parametri su ispravno uneseni.\n";
-    cout << "Unesen je broj sibica i isti iznosi: " << N << ".\n";
-    cout << "Tijekom igre mozete povlaciti jednu, dvije ili tri sibice.\n";
+    cout << "Unesen je broj zigica i isti iznosi: " << N << ".\n";
+    cout << "Tijekom igre mozete povlaciti jednu, dvije ili tri zigice.\n";
     
     bool igrac_a = true;
 
