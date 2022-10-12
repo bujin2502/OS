@@ -31,14 +31,14 @@ int main (int argc, char *argv[]) {
     do {
             if (igrac_a) {
         cout << "Zigica na stolu: " << N << ". Na redu igrac A.\n";
-        cout << "Zigica igrac A uzeo sa stola\n";
+        cout << "Zigica igrac A uzeo sa stola:\n";
         do {
             cin >> n;
         } while (n<1 || n>3 || n>N);
         N = N - n;
         }  else {
         cout << "Zigica na stolu: " << N << ". Na redu igrac B.\n";
-        cout << "Zigica igrac B uzeo sa stola\n";
+        cout << "Zigica igrac B uzeo sa stola:\n";
         do {
             cin >> n;
         } while (n<1 || n>3 || n>N);
