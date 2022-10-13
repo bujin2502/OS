@@ -1,11 +1,35 @@
 #include<iostream>
 #include<cstdlib>
 #include<signal.h>
+#include<unistd.h>
 
 using namespace std;
 
 int N;
 int n;
+
+void odabir (int sig) {
+    switch (sig) {
+    case SIGINT : {
+        cout << "Zigica igrac A uzeo sa stola:\n";
+        do {
+            cin >> n;
+        } while (n<1 || n>3 || n>N);
+        N = N - n;
+        break;
+    }
+    case SIGQUIT : {
+        cout << "Zigica igrac B uzeo sa stola:\n";
+        do {
+            cin >> n;
+        } while (n<1 || n>3 || n>N);
+        N = N - n;
+        break;
+    }
+    }
+
+
+}
 
 int main (int argc, char *argv[]) {
 
@@ -14,7 +38,6 @@ int main (int argc, char *argv[]) {
         cout << "Pri unosu programa u komandnoj liniji na kraju dodajte jedan broj veci od broj 3.\n";
         return 0;
     }
-
     N = atoi(argv[1]);
 
     if (N<4) {
@@ -31,18 +54,13 @@ int main (int argc, char *argv[]) {
     do {
             if (igrac_a) {
         cout << "Zigica na stolu: " << N << ". Na redu igrac A.\n";
-        cout << "Zigica igrac A uzeo sa stola:\n";
-        do {
-            cin >> n;
-        } while (n<1 || n>3 || n>N);
-        N = N - n;
+        sigset(SIGINT, odabir);
+        sleep(30);
+        
         }  else {
         cout << "Zigica na stolu: " << N << ". Na redu igrac B.\n";
-        cout << "Zigica igrac B uzeo sa stola:\n";
-        do {
-            cin >> n;
-        } while (n<1 || n>3 || n>N);
-        N = N - n;
+        sigset(SIGQUIT, odabir);
+        sleep(30);  
         }
     igrac_a = !igrac_a;
     } while (N>0);
