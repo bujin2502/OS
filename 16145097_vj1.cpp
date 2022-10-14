@@ -8,13 +8,15 @@ using namespace std;
 int N;
 int n;
 
-void prekid(int sig) {
+void prekid(int sig)
+{
     if (SIGTSTP)
-    cout << "Izlazak iz igre!" << endl;
+        cout << "Izlazak iz igre!" << endl;
     exit(0);
-    }
+}
 
-void odabir(int sig) {
+void odabir(int sig)
+{
     switch (sig)
     {
     case SIGINT:
@@ -23,6 +25,10 @@ void odabir(int sig) {
         do
         {
             cin >> n;
+            if (n < 1 || n > 3 || n > N)
+            {
+                cout << "Broj mora biti izmedu 1 i 3 i ne moze biti veci od broja zigica na stolu!\n";
+            }
         } while (n < 1 || n > 3 || n > N);
         N = N - n;
         break;
@@ -33,6 +39,10 @@ void odabir(int sig) {
         do
         {
             cin >> n;
+            if (n < 1 || n > 3 || n > N)
+            {
+                cout << "Broj mora biti izmedu 1 i 3 i ne moze biti veci od broja zigica na stolu!\n";
+            }
         } while (n < 1 || n > 3 || n > N);
         N = N - n;
         break;
