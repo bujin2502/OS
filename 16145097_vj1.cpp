@@ -5,6 +5,8 @@
 
 using namespace std;
 
+void(*sigset(int sig, void (*disp)(int)))(int);
+
 int N;
 int n;
 
@@ -21,6 +23,7 @@ void odabir(int sig)
     {
     case SIGINT:
     {
+        sighold(sig);
         cout << "Zigica igrac A uzeo sa stola:\n";
         do
         {
@@ -31,10 +34,12 @@ void odabir(int sig)
             }
         } while (n < 1 || n > 3 || n > N);
         N = N - n;
+        sigrelse(sig);
         break;
     }
     case SIGQUIT:
     {
+        sighold(sig);
         cout << "Zigica igrac B uzeo sa stola:\n";
         do
         {
@@ -45,6 +50,7 @@ void odabir(int sig)
             }
         } while (n < 1 || n > 3 || n > N);
         N = N - n;
+        sigrelse(sig);
         break;
     }
     }
@@ -79,13 +85,13 @@ int main(int argc, char *argv[])
     {
         if (igrac_a)
         {
-            cout << "Zigica na stolu: " << N << ". Na redu igrac A.\n";
+            cout << "Zigica na stolu: " << N << ". Na redu igrac A. Unesi Ctrl-C.\n";
             sigset(SIGINT, odabir);
             pause();
         }
         else
         {
-            cout << "Zigica na stolu: " << N << ". Na redu igrac B.\n";
+            cout << "Zigica na stolu: " << N << ". Na redu igrac B. Unesi Ctrl-\\\n";
             sigset(SIGQUIT, odabir);
             pause();
         }
@@ -97,11 +103,11 @@ int main(int argc, char *argv[])
         cout << "Ostalo je " << N << " zigica na stolu.\n";
         if (igrac_a)
         {
-            cout << "Pobjednik je igrac A\n";
+            cout << "Pobjednik je igrac A! Cestitam!\n";
         }
         else
         {
-            cout << "Pobjednik je igrac B\n";
+            cout << "Pobjednik je igrac B! Cestitam!\n";
         }
     }
     return 0;
