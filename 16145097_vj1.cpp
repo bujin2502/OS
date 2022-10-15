@@ -1,7 +1,7 @@
 #include <iostream>
-#include <cstdlib>
+#include <cstdlib> //atoi
 #include <signal.h>
-#include <unistd.h>
+#include <unistd.h> //pause
 
 using namespace std;
 
