@@ -7,49 +7,62 @@ using namespace std;
 
 int N;
 int n;
+bool igrac_a = true;
 
 void prekid(int sig)
 {
-    cout << "Izlazak iz igre!" << endl;
+    cout << "\nIzlazak iz igre!" << endl;
     exit(0);
 }
 
 void odabir_A(int sig)
 {
-    sighold(SIGINT);
-    sighold(SIGQUIT);
-    cout << "Zigica igrac A uzeo sa stola:" << endl;
-    do
+    switch (sig)
     {
-        cin >> n;
-        if (n < 1 || n > 3 || n > N)
+    case SIGINT:
+        cout << "\nZigica igrac A uzeo sa stola:" << endl;
+        do
         {
-            cout << "Broj mora biti izmedu 1 i 3 i ne moze biti veci od broja zigica na stolu!" << endl;
-        }
-    } while (n < 1 || n > 3 || n > N);
-    N = N - n;
+            cin >> n;
+            if (n < 1 || n > 3 || n > N)
+            {
+                cout << "Broj mora biti izmedu 1 i 3 i ne moze biti veci od broja zigica na stolu!" << endl;
+            }
+        } while (n < 1 || n > 3 || n > N);
+        N = N - n;
+        break;
+    case SIGQUIT:
+        cout << "\nPogresan unos signala. Unesi Ctrl-C!" << endl;
+        igrac_a = !igrac_a;
+        break;
+    }
 }
 
 void odabir_B(int sig)
 {
-    sighold(SIGINT);
-    sighold(SIGQUIT);
-    cout << "Zigica igrac B uzeo sa stola:" << endl;
-    do
+    switch (sig)
     {
-        cin >> n;
-        if (n < 1 || n > 3 || n > N)
+    case SIGQUIT:
+        cout << "\nZigica igrac B uzeo sa stola:" << endl;
+        do
         {
-            cout << "Broj mora biti izmedu 1 i 3 i ne moze biti veci od broja zigica na stolu!" << endl;
-        }
-    } while (n < 1 || n > 3 || n > N);
-    N = N - n;
+            cin >> n;
+            if (n < 1 || n > 3 || n > N)
+            {
+                cout << "Broj mora biti izmedu 1 i 3 i ne moze biti veci od broja zigica na stolu!" << endl;
+            }
+        } while (n < 1 || n > 3 || n > N);
+        N = N - n;
+        break;
+    case SIGINT:
+        cout << "\nPogresan unos signala. Unesi Ctrl-\\!" << endl;
+        igrac_a = !igrac_a;
+        break;
+    }
 }
 
 int main(int argc, char *argv[])
 {
-
-    pause();
     if (argc != 2)
     {
         cout << "Ovaj program mora primiti jedan argument!" << endl;
@@ -70,22 +83,20 @@ int main(int argc, char *argv[])
 
     sigset(SIGTSTP, prekid);
 
-    bool igrac_a = true;
-
     do
     {
         if (igrac_a)
         {
-            sighold(SIGQUIT);
             cout << "Zigica na stolu: " << N << ". Na redu igrac A. Unesi Ctrl-C." << endl;
             sigset(SIGINT, odabir_A);
+            sigset(SIGQUIT, odabir_A);
             pause();
         }
         else
         {
-            sighold(SIGINT);
             cout << "Zigica na stolu: " << N << ". Na redu igrac B. Unesi Ctrl-\\" << endl;
             sigset(SIGQUIT, odabir_B);
+            sigset(SIGINT, odabir_B);
             pause();
         }
         igrac_a = !igrac_a;
