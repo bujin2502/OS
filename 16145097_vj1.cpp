@@ -20,6 +20,8 @@ void odabir_A(int sig)
     switch (sig)
     {
     case SIGINT:
+        sigignore(SIGQUIT);
+        sigignore(SIGINT);
         cout << "\nZigica igrac A uzeo sa stola:" << endl;
         do
         {
@@ -43,6 +45,8 @@ void odabir_B(int sig)
     switch (sig)
     {
     case SIGQUIT:
+        sigignore(SIGQUIT);
+        sigignore(SIGINT);
         cout << "\nZigica igrac B uzeo sa stola:" << endl;
         do
         {
