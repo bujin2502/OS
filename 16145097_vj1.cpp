@@ -17,7 +17,7 @@ void prekid(int sig)
 
 void odabir_A(int sig)
 {
-    switch (sig)
+switch (sig)
     {
     case SIGINT:
         sigignore(SIGQUIT);
@@ -28,7 +28,7 @@ void odabir_A(int sig)
             cin >> n;
             if (n < 1 || n > 3 || n > N)
             {
-                cout << "Broj mora biti izmedu 1 i 3 i ne moze biti veci od broja zigica na stolu!" << endl;
+                cout << "Broj mora biti izmedu 1 i 3 te ne moze biti veci od broja zigica na stolu!" << endl;
             }
         } while (n < 1 || n > 3 || n > N);
         N = N - n;
@@ -53,7 +53,7 @@ void odabir_B(int sig)
             cin >> n;
             if (n < 1 || n > 3 || n > N)
             {
-                cout << "Broj mora biti izmedu 1 i 3 i ne moze biti veci od broja zigica na stolu!" << endl;
+                cout << "Broj mora biti izmedu 1 i 3 te ne moze biti veci od broja zigica na stolu!" << endl;
             }
         } while (n < 1 || n > 3 || n > N);
         N = N - n;
