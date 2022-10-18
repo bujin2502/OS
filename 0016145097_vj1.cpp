@@ -23,14 +23,20 @@ switch (sig)
         sigignore(SIGQUIT);
         sigignore(SIGINT);
         cout << "\nZigica igrac A uzeo sa stola:" << endl;
-        do
-        {
+        cout << "Unesi broj: ";
+        cin >> n;
+        while (cin.fail()) {
+            cin.clear();
+            cin.ignore();
+            cout << "Niste unjeli broj. Molimo unesite jedan broj: ";
             cin >> n;
-            if (n < 1 || n > 3 || n > N)
-            {
-                cout << "Broj mora biti izmedu 1 i 3 te ne moze biti veci od broja zigica na stolu!" << endl;
-            }
-        } while (n < 1 || n > 3 || n > N);
+        }
+
+        while (n < 1 || n > 3 || n > N) {
+            cout << "Broj mora biti izmedu 1 i 3 te ne moze biti veci od broja zigica na stolu!" << endl;
+            cout << "Unesi broj: ";
+            cin >> n;
+        }
         N = N - n;
         break;
     case SIGQUIT:
@@ -48,14 +54,20 @@ void odabir_B(int sig)
         sigignore(SIGQUIT);
         sigignore(SIGINT);
         cout << "\nZigica igrac B uzeo sa stola:" << endl;
-        do
-        {
+        cout << "Unesi broj: ";
+        cin >> n;
+        while (cin.fail()) {
+            cin.clear();
+            cin.ignore();
+            cout << "Niste unjeli broj. Molimo unesite jedan broj: ";
             cin >> n;
-            if (n < 1 || n > 3 || n > N)
-            {
-                cout << "Broj mora biti izmedu 1 i 3 te ne moze biti veci od broja zigica na stolu!" << endl;
-            }
-        } while (n < 1 || n > 3 || n > N);
+        }
+
+        while (n < 1 || n > 3 || n > N) {
+            cout << "Broj mora biti izmedu 1 i 3 te ne moze biti veci od broja zigica na stolu!" << endl;
+            cout << "Unesi broj: ";
+            cin >> n;
+        }
         N = N - n;
         break;
     case SIGINT:
