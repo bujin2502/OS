@@ -6,45 +6,49 @@
 #include <csignal>
 #include <pthread.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <cmath>
 
 using namespace std;
+
+int block;
+pthread_t *polje_dretvi;
 
 struct slog_info_polje {
     long double *polje;
     int br_el;
-    int blok;
     int m;
+    int threadnum;
 } *info_polje;
 
-void *dretva (void *arg) {
-    int i = *((int*)arg);
-    int start = info_polje->blok * i;
-    int kraj = start + info_polje->blok;
-
-    if (kraj > info_polje->br_el) {
-        kraj = info_polje->br_el;
+void kraj (int sig) {
+    if (!sig) {
+        for (int i = 0; i < info_polje->threadnum; i++) pthread_join(polje_dretvi[i], NULL);
     }
-
-//    printf("Dretva %d\n", i);
-
-    for (int i = start; i < kraj; i++) {
-            long double e = exp(info_polje->polje[i]);
-            printf("%Lf\n", e);
-            exit(0);
+    else {
+        for (int i = 0; i < info_polje->threadnum; i++) pthread_kill(polje_dretvi[i], SIGINT);
+        delete info_polje;
     }
     exit(0);
 }
 
-int broj_dretvi;
-pthread_t *polje_dretvi;
-
-void kraj (int sig) {
-    if (!sig) {
-        for (int i = 0; i < broj_dretvi; i++) pthread_join(polje_dretvi[i], NULL);
-    }
-    else {
-        for (int i = 0; i < broj_dretvi; i++) pthread_kill(polje_dretvi[i], SIGKILL);
-        delete info_polje;
+void *dretva (void *arg) {
+    int i = *((int*)arg);
+    int start = info_polje->threadnum * i;
+    int kraj = start + info_polje->threadnum;
+/*     if (kraj > info_polje->br_el) {
+        kraj = info_polje->br_el;
+    } */
+    long double e = 0;
+    for (int i = start; i < kraj; i++) {
+        for (int j = 0; j < info_polje->m; j++) {
+            int factoriel = 1;
+            for (int k = 1; k <= j; k++) {
+                factoriel *= k;
+            }
+            long double e = e + (pow(info_polje->polje[i], j)/factoriel);
+        }
+        printf("%-.11Lf\n", e);
     }
     exit(0);
 }
@@ -59,10 +63,12 @@ int main (int argc, char **argv) {
     }
 
     info_polje = new slog_info_polje;
-    info_polje->br_el = atoi(argv[1]);
-    info_polje->blok = atoi(argv[2]);
-    info_polje->m = atoi(argv[3]);
+    info_polje->br_el = atoi(argv[1]); // broj elemenata polja - l
+    info_polje->m = atoi(argv[2]); // broj iteracija - m
+    info_polje->threadnum = atoi(argv[3]); // broj dretvi - n
     info_polje->polje = new long double [info_polje->br_el];
+
+    polje_dretvi = new pthread_t [info_polje->threadnum];
 
     sigset(SIGINT, kraj);
 
@@ -74,16 +80,13 @@ int main (int argc, char **argv) {
         printf("%.11Lf\n", info_polje->polje[i]);
     }
 
-    broj_dretvi = info_polje->br_el / info_polje->blok;
-    if (info_polje->br_el % info_polje->blok) broj_dretvi++;
+    block = info_polje->br_el / info_polje->threadnum;
 
-    polje_dretvi = new pthread_t [broj_dretvi];
-
-    int *polje_i = new int [broj_dretvi];
+    int *polje_i = new int [info_polje->threadnum];
 
     printf("\nEksponencijale =\n");
 
-    for (int i = 0; i < broj_dretvi; i++)
+    for (int i = 0; i < info_polje->threadnum; i++)
     {
         polje_i[i] = i;
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
