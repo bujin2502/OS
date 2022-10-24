@@ -1,125 +1,94 @@
 #include <iostream>
-#include <cstdlib> //atoi
-#include <signal.h>
-#include <unistd.h> //pause
-#include <sys/types.h> // fork
-#include <unistd.h> // fork
-
+#include <iomanip>
+#include <math.h>
+#include <cstdlib>
+#include <ctime>
+#include <csignal>
+#include <pthread.h>
+#include <stdio.h>
 
 using namespace std;
 
-int N;
-int n;
-bool igrac_a = true;
+struct slog_info_polje {
+    long double *polje;
+    int br_el;
+    int blok;
+    int m;
+} *info_polje;
 
-void prekid(int sig)
-{
-    cout << "\nIzlazak iz igre!" << endl;
+void *dretva (void *arg) {
+    int i = *((int*)arg);
+    int start = info_polje->blok * i;
+    int kraj = start + info_polje->blok;
+
+    if (kraj > info_polje->br_el) {
+        kraj = info_polje->br_el;
+    }
+
+//    printf("Dretva %d\n", i);
+
+    for (int i = start; i < kraj; i++) {
+            long double e = exp(info_polje->polje[i]);
+            printf("%Lf\n", e);
+            exit(0);
+    }
     exit(0);
 }
 
-void odabir_A(int sig)
-{
-switch (sig)
-    {
-    case SIGINT:
-        sigignore(SIGQUIT);
-        sigignore(SIGINT);
-        cout << "\nZigica igrac A uzeo sa stola:" << endl;
-        do
-        {
-            cin >> n;
-            if (n < 1 || n > 3 || n > N)
-            {
-                cout << "Broj mora biti izmedu 1 i 3 te ne moze biti veci od broja zigica na stolu!" << endl;
-            }
-        } while (n < 1 || n > 3 || n > N);
-        N = N - n;
-        break;
-    case SIGQUIT:
-        cout << "\nPogresan unos signala. Unesi Ctrl-C!" << endl;
-        igrac_a = !igrac_a;
-        break;
+int broj_dretvi;
+pthread_t *polje_dretvi;
+
+void kraj (int sig) {
+    if (!sig) {
+        for (int i = 0; i < broj_dretvi; i++) pthread_join(polje_dretvi[i], NULL);
     }
+    else {
+        for (int i = 0; i < broj_dretvi; i++) pthread_kill(polje_dretvi[i], SIGKILL);
+        delete info_polje;
+    }
+    exit(0);
 }
 
-void odabir_B(int sig)
-{
-    switch (sig)
-    {
-    case SIGQUIT:
-        sigignore(SIGQUIT);
-        sigignore(SIGINT);
-        cout << "\nZigica igrac B uzeo sa stola:" << endl;
-        do
-        {
-            cin >> n;
-            if (n < 1 || n > 3 || n > N)
-            {
-                cout << "Broj mora biti izmedu 1 i 3 te ne moze biti veci od broja zigica na stolu!" << endl;
-            }
-        } while (n < 1 || n > 3 || n > N);
-        N = N - n;
-        break;
-    case SIGINT:
-        cout << "\nPogresan unos signala. Unesi Ctrl-\\!" << endl;
-        igrac_a = !igrac_a;
-        break;
-    }
-}
+int main (int argc, char **argv) {
+    system("clear");
 
-int main(int argc, char *argv[])
-{
-    if (argc != 2)
+    if (argc != 4)
     {
-        cout << "Ovaj program mora primiti jedan argument!" << endl;
-        cout << "Pri unosu programa u komandnoj liniji na kraju dodajte jedan broj veci od broj 3." << endl;
-        return 0;
-    }
-    N = atoi(argv[1]);
-
-    if (N < 4)
-    {
-        cout << "Unesen je broj manji od broja 4! Morate unjeti broj veci od broja 3." << endl;
+        cout << "Moraju se unijeti 3 argumenta\n";
         return 0;
     }
 
-    cout << "Parametri su ispravno uneseni." << endl;
-    cout << "Unesen je broj zigica i isti iznosi: " << N << "." << endl;
-    cout << "Tijekom igre mozete povlaciti jednu, dvije ili tri zigice." << endl;
+    info_polje = new slog_info_polje;
+    info_polje->br_el = atoi(argv[1]);
+    info_polje->blok = atoi(argv[2]);
+    info_polje->m = atoi(argv[3]);
+    info_polje->polje = new long double [info_polje->br_el];
 
-    sigset(SIGTSTP, prekid);
+    sigset(SIGINT, kraj);
 
-    do
+    srand(time(0));
+    printf("Eksponenti = \n");
+    for (int i = 0; i < info_polje->br_el; i++)
     {
-        if (igrac_a)
-        {
-            cout << "Zigica na stolu: " << N << ". Na redu igrac A. Unesi Ctrl-C." << endl;
-            sigset(SIGINT, odabir_A);
-            sigset(SIGQUIT, odabir_A);
-            pause();
-        }
-        else
-        {
-            cout << "Zigica na stolu: " << N << ". Na redu igrac B. Unesi Ctrl-\\" << endl;
-            sigset(SIGQUIT, odabir_B);
-            sigset(SIGINT, odabir_B);
-            pause();
-        }
-        igrac_a = !igrac_a;
-    } while (N > 0);
-
-    if (N < 1)
-    {
-        cout << "Ostalo je " << N << " zigica na stolu." << endl;
-        if (igrac_a)
-        {
-            cout << "Pobjednik je igrac A! Cestitam!" << endl;
-        }
-        else
-        {
-            cout << "Pobjednik je igrac B! Cestitam!" << endl;
-        }
+        info_polje->polje[i] = (long double) rand()/(RAND_MAX - 1) * 10;
+        printf("%.11Lf\n", info_polje->polje[i]);
     }
-    return 0;
+
+    broj_dretvi = info_polje->br_el / info_polje->blok;
+    if (info_polje->br_el % info_polje->blok) broj_dretvi++;
+
+    polje_dretvi = new pthread_t [broj_dretvi];
+
+    int *polje_i = new int [broj_dretvi];
+
+    printf("\nEksponencijale =\n");
+
+    for (int i = 0; i < broj_dretvi; i++)
+    {
+        polje_i[i] = i;
+        pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
+
+    }
+
+    kraj(0);
 }
