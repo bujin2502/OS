@@ -23,18 +23,19 @@ struct slog_info_polje {
 void prekid (int sig) {
     if (!sig) {
         for (int i = 0; i < info_polje->threadnum; i++) pthread_join(polje_dretvi[i], NULL);
+        delete info_polje;
     }
     else {
-        for (int i = 0; i < info_polje->threadnum; i++) pthread_kill(polje_dretvi[i], SIGINT);
+        for (int i = 0; i < info_polje->threadnum; i++) pthread_kill(polje_dretvi[i], SIGKILL);
         delete info_polje;
     }
     exit(0);
 }
 
-double faktorijel (double m) {
-    double rezultat = 1;
-    for (double i = 1; i <= m; i++) {
-        rezultat *= rezultat*i;
+int faktorijel (int m) {
+    int rezultat = 1;
+    for (int i = 1; i <= m; i++) {
+        rezultat *= i;
     }
     return rezultat;
 }
@@ -42,19 +43,25 @@ double faktorijel (double m) {
 void *dretva (void *arg) {
     int i = *((int*)arg);
     int blok = info_polje->br_el / info_polje->threadnum;
-    int ostatak = info_polje->br_el % info_polje->threadnum;
     int start = blok * i;
     int kraj = start + blok;
-    if (kraj < info_polje->br_el) {
+    if (kraj > info_polje->br_el) {
         kraj = info_polje->br_el;
     }
     
-    long double rezultat = exp(info_polje->polje[i]);
+    int kursor = start;
 
-    printf("%17.11Lf\n", rezultat);
-    sleep(30);
-    return 0;
-}
+    while (kursor <= kraj)
+    {
+       printf("Dretva broj %d \t %d \t %d \t %d\n", i, blok, start, kraj);
+       for (int j=start; j<kraj; j++) {
+        printf("Broj u polju %d; %Lf\n", j, info_polje->polje[j]);
+       }
+       kursor++;
+       sleep(1);
+    }
+    exit(0);
+    }
 
 int main (int argc, char **argv) {
     system("clear");
@@ -80,7 +87,7 @@ int main (int argc, char **argv) {
     for (int i = 0; i < info_polje->br_el; i++)
     {
         info_polje->polje[i] = (long double) rand()/(RAND_MAX - 1) * 10;
-        printf("%.11Lf\n", info_polje->polje[i]);
+        printf("%17.11Lf\n", info_polje->polje[i]);
     }
 
     int *polje_i = new int [info_polje->threadnum];
@@ -93,6 +100,5 @@ int main (int argc, char **argv) {
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
 
     }
-//    return 0;
     prekid(0);
 }
