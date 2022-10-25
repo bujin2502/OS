@@ -11,7 +11,6 @@
 
 using namespace std;
 
-int block;
 pthread_t *polje_dretvi;
 
 struct slog_info_polje {
@@ -21,7 +20,7 @@ struct slog_info_polje {
     int threadnum;
 } *info_polje;
 
-void kraj (int sig) {
+void prekid (int sig) {
     if (!sig) {
         for (int i = 0; i < info_polje->threadnum; i++) pthread_join(polje_dretvi[i], NULL);
     }
@@ -32,25 +31,29 @@ void kraj (int sig) {
     exit(0);
 }
 
+double faktorijel (double m) {
+    double rezultat = 1;
+    for (double i = 1; i <= m; i++) {
+        rezultat *= rezultat*i;
+    }
+    return rezultat;
+}
+
 void *dretva (void *arg) {
     int i = *((int*)arg);
-    int start = info_polje->threadnum * i;
-    int kraj = start + info_polje->threadnum;
-/*     if (kraj > info_polje->br_el) {
+    int blok = info_polje->br_el / info_polje->threadnum;
+    int ostatak = info_polje->br_el % info_polje->threadnum;
+    int start = blok * i;
+    int kraj = start + blok;
+    if (kraj < info_polje->br_el) {
         kraj = info_polje->br_el;
-    } */
-    long double e = 0;
-    for (int i = start; i < kraj; i++) {
-        for (int j = 0; j < info_polje->m; j++) {
-            int factoriel = 1;
-            for (int k = 1; k <= j; k++) {
-                factoriel *= k;
-            }
-            long double e = e + (pow(info_polje->polje[i], j)/factoriel);
-        }
-        printf("%-.11Lf\n", e);
     }
-    exit(0);
+    
+    long double rezultat = exp(info_polje->polje[i]);
+
+    printf("%17.11Lf\n", rezultat);
+    sleep(30);
+    return 0;
 }
 
 int main (int argc, char **argv) {
@@ -70,7 +73,7 @@ int main (int argc, char **argv) {
 
     polje_dretvi = new pthread_t [info_polje->threadnum];
 
-    sigset(SIGINT, kraj);
+    sigset(SIGINT, prekid);
 
     srand(time(0));
     printf("Eksponenti = \n");
@@ -79,8 +82,6 @@ int main (int argc, char **argv) {
         info_polje->polje[i] = (long double) rand()/(RAND_MAX - 1) * 10;
         printf("%.11Lf\n", info_polje->polje[i]);
     }
-
-    block = info_polje->br_el / info_polje->threadnum;
 
     int *polje_i = new int [info_polje->threadnum];
 
@@ -92,6 +93,6 @@ int main (int argc, char **argv) {
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
 
     }
-
-    kraj(0);
+//    return 0;
+    prekid(0);
 }
