@@ -24,17 +24,21 @@ void prekid (int sig) {
     if (!sig) {
         for (int i = 0; i < ulaz->br_dret; i++) pthread_join(polje_dretvi[i], NULL);
         delete ulaz;
+        delete ulaz->polje;
+        delete ulaz->izlaz;
     }
     else {
         for (int i = 0; i < ulaz->br_dret; i++) pthread_kill(polje_dretvi[i], SIGKILL);
         delete ulaz;
+        delete ulaz->polje;
+        delete ulaz->izlaz;
     }
     exit(0);
 }
 
-int faktorijel (int m) {
-    int rezultat = 1;
-    for (int i = 1; i <= m; i++) {
+long double faktorijel (int m) {
+    long double rezultat = 1;
+    for (int i = m; i > 0; i--) {
         rezultat *= i;
     }
     return rezultat;
@@ -55,8 +59,8 @@ void *dretva (void *arg) {
         long double rez = 0;
         for (int z = 0; z < prec; z++) {
             rez += pow(ulaz->polje[l], z)/faktorijel(z);
+            }
             ulaz->izlaz[l] = rez;
-        }
     }
     pthread_exit(arg);
     }
