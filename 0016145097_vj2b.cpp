@@ -23,15 +23,15 @@ struct slog_ulaz {
 void prekid (int sig) {
     if (!sig) {
         for (int i = 0; i < ulaz->br_dret; i++) pthread_join(polje_dretvi[i], NULL);
-        delete ulaz;
         delete ulaz->polje;
         delete ulaz->izlaz;
+        delete ulaz;
     }
     else {
         for (int i = 0; i < ulaz->br_dret; i++) pthread_kill(polje_dretvi[i], SIGKILL);
-        delete ulaz;
         delete ulaz->polje;
         delete ulaz->izlaz;
+        delete ulaz;
     }
     exit(0);
 }
@@ -52,7 +52,7 @@ void *dretva (void *arg) {
     int start = broj * i;
     int kraj = start + broj;
     if (kraj > ulaz->br_elem) {
-        kraj = start + mod;
+        kraj = ulaz->br_elem;
     }
 
     for (int l = start; l < kraj; l++) {
