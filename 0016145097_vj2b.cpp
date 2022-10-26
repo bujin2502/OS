@@ -1,5 +1,5 @@
 #include <iostream>
-#include <iomanip>
+// #include <iomanip>
 #include <math.h>
 #include <cstdlib>
 #include <ctime>
@@ -51,7 +51,7 @@ void *dretva (void *arg) {
     int prec = ulaz->m;
     int start = broj * i;
     int kraj = start + broj;
-    if (kraj > ulaz->br_elem) {
+    if (start == ulaz->br_elem-broj-mod) {
         kraj = ulaz->br_elem;
     }
 
