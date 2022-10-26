@@ -7,27 +7,27 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <cmath>
 
 using namespace std;
 
 pthread_t *polje_dretvi;
 
-struct slog_info_polje {
+struct slog_ulaz {
     long double *polje;
-    int br_el;
+    long double *izlaz;
+    int br_elem;
     int m;
-    int threadnum;
-} *info_polje;
+    int br_dret;
+} *ulaz;
 
 void prekid (int sig) {
     if (!sig) {
-        for (int i = 0; i < info_polje->threadnum; i++) pthread_join(polje_dretvi[i], NULL);
-        delete info_polje;
+        for (int i = 0; i < ulaz->br_dret; i++) pthread_join(polje_dretvi[i], NULL);
+        delete ulaz;
     }
     else {
-        for (int i = 0; i < info_polje->threadnum; i++) pthread_kill(polje_dretvi[i], SIGKILL);
-        delete info_polje;
+        for (int i = 0; i < ulaz->br_dret; i++) pthread_kill(polje_dretvi[i], SIGKILL);
+        delete ulaz;
     }
     exit(0);
 }
@@ -42,25 +42,23 @@ int faktorijel (int m) {
 
 void *dretva (void *arg) {
     int i = *((int*)arg);
-    int blok = info_polje->br_el / info_polje->threadnum;
-    int start = blok * i;
-    int kraj = start + blok;
-    if (kraj > info_polje->br_el) {
-        kraj = info_polje->br_el;
+    int broj = ulaz->br_elem / ulaz->br_dret;
+    int mod = ulaz->br_elem % ulaz->br_dret;
+    int prec = ulaz->m;
+    int start = broj * i;
+    int kraj = start + broj;
+    if (kraj > ulaz->br_elem) {
+        kraj = start + mod;
     }
-    
-    int kursor = start;
 
-    while (kursor <= kraj)
-    {
-       printf("Dretva broj %d \t %d \t %d \t %d\n", i, blok, start, kraj);
-       for (int j=start; j<kraj; j++) {
-        printf("Broj u polju %d; %Lf\n", j, info_polje->polje[j]);
-       }
-       kursor++;
-       sleep(1);
+    for (int l = start; l < kraj; l++) {
+        long double rez = 0;
+        for (int z = 0; z < prec; z++) {
+            rez += pow(ulaz->polje[l], z)/faktorijel(z);
+            ulaz->izlaz[l] = rez;
+        }
     }
-    exit(0);
+    pthread_exit(arg);
     }
 
 int main (int argc, char **argv) {
@@ -72,33 +70,40 @@ int main (int argc, char **argv) {
         return 0;
     }
 
-    info_polje = new slog_info_polje;
-    info_polje->br_el = atoi(argv[1]); // broj elemenata polja - l
-    info_polje->m = atoi(argv[2]); // broj iteracija - m
-    info_polje->threadnum = atoi(argv[3]); // broj dretvi - n
-    info_polje->polje = new long double [info_polje->br_el];
+    ulaz = new slog_ulaz;
+    ulaz->br_elem = atoi(argv[1]); // broj elemenata polja - l
+    ulaz->m = atoi(argv[2]); // broj iteracija - m
+    ulaz->br_dret = atoi(argv[3]); // broj dretvi - n
+    ulaz->polje = new long double [ulaz->br_elem];
+    ulaz->izlaz = new long double [ulaz->br_elem];
 
-    polje_dretvi = new pthread_t [info_polje->threadnum];
+    polje_dretvi = new pthread_t [ulaz->br_dret];
 
     sigset(SIGINT, prekid);
 
     srand(time(0));
     printf("Eksponenti = \n");
-    for (int i = 0; i < info_polje->br_el; i++)
+    for (int i = 0; i < ulaz->br_elem; i++)
     {
-        info_polje->polje[i] = (long double) rand()/(RAND_MAX - 1) * 10;
-        printf("%17.11Lf\n", info_polje->polje[i]);
+        ulaz->polje[i] = (long double) rand()/(RAND_MAX - 1) * 10;
+        printf("%17.11Lf\n", ulaz->polje[i]);
     }
 
-    int *polje_i = new int [info_polje->threadnum];
+    int *polje_i = new int [ulaz->br_dret];
 
-    printf("\nEksponencijale =\n");
-
-    for (int i = 0; i < info_polje->threadnum; i++)
+    for (int i = 0; i < ulaz->br_dret; i++)
     {
         polje_i[i] = i;
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
+    }
 
+    sleep(1);
+
+    printf("\nEksponencijale =\n");
+
+    int brojac = ulaz->br_elem;
+    for (int k = 0; k < brojac; k++) {
+        printf("%17.11Lf\n", ulaz->izlaz[k]);
     }
     prekid(0);
 }
