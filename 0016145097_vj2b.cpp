@@ -22,15 +22,9 @@ struct slog_ulaz {
 void prekid (int sig) {
     if (!sig) {
         for (int i = 0; i < ulaz->br_dret; i++) pthread_join(polje_dretvi[i], NULL);
-        delete ulaz->polje;
-        delete ulaz->izlaz;
-        delete ulaz;
     }
     else {
         for (int i = 0; i < ulaz->br_dret; i++) pthread_kill(polje_dretvi[i], SIGKILL);
-        delete ulaz->polje;
-        delete ulaz->izlaz;
-        delete ulaz;
     }
     exit(0);
 }
