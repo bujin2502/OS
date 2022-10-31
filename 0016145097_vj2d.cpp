@@ -30,21 +30,16 @@ void prekid(int sig)
 
 void k_o(int proces)
 {
-    podaci->ulaz = new int[procesi];
-    podaci->broj = new int[procesi];
-    podaci->najveci = 0;
     podaci->ulaz[proces] = 1;
-    for (int i = 1; i <= procesi; i++)
+    for (int i = 0; i < procesi; i++)
     {
-        if (podaci->broj[i] > podaci->najveci)
+        if (podaci->broj[i] > podaci->najveci) // očito ovdje ne dolazi do najvećeg broja
             podaci->najveci = podaci->broj[i];
     }
     podaci->broj[proces] = podaci->najveci + 1;
     podaci->ulaz[proces] = 0;
-    printf("Ulaz: %d\n", podaci->ulaz[proces]);
-    printf("Broj: %d\n", podaci->broj[proces]);
-    printf("Najveci: %d\n", podaci->najveci);
-    for (int j = 1; j <= procesi; j++)
+    printf("%d, %d, %d\n", proces, podaci->broj[proces], podaci->najveci);
+    for (int j = 0; j < procesi; j++)
     {
         while (podaci->ulaz[j] == 1)
             ;
@@ -73,22 +68,27 @@ int main(int argc, char *argv[])
 
     procesi = atoi(argv[1]);
 
+    podaci->ulaz = new int[procesi];
+    podaci->broj = new int[procesi];
+    podaci->najveci = 0;
+
     sigset(SIGINT, prekid);
 
-    for (int i = 1; i <= procesi; i++)
+    for (int i = 0; i < procesi; i++)
     {
         switch (fork())
         {
         case 0:
         {
-            for (int k = 1; k <= 3; k++)
+            for (int k = 0; k < 5; k++)
             {
                 k_o(i);
-                for (int m = 1; m <= 3; m++)
+                for (int m = 0; m < 5; m++)
                 {
-                    printf("Proces: %d, K.O. br: %d (%d/3)\n", i, k, m);
+                    printf("Proces: %d, K.O. br: %d (%d/5)\n", i + 1, k + 1, m + 1);
                     sleep(1);
                 }
+                izl_k_o(i);
             }
             exit(0);
         }
