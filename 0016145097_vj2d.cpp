@@ -8,7 +8,7 @@ using namespace std;
 
 struct zajednicki
 {
-    int *ulaz;
+    int *trazim;
     int *broj;
     int najveci;
 };
@@ -28,29 +28,34 @@ void prekid(int sig)
     exit(0);
 }
 
-void k_o(int proces)
+int max () {
+    int zadnji = 0;
+	for(int i = 0; i < procesi; i++){
+		if(podaci->broj[i] > zadnji) zadnji = podaci->broj[i];
+	}
+	return zadnji + 1;
+}
+
+void k_o(int i)
 {
-    podaci->ulaz[proces] = 1;
-    for (int i = 0; i < procesi; i++)
-    {
-        if (podaci->broj[i] > podaci->najveci) // očito ovdje ne dolazi do najvećeg broja
-            podaci->najveci = podaci->broj[i];
-    }
-    podaci->broj[proces] = podaci->najveci + 1;
-    podaci->ulaz[proces] = 0;
-    printf("%d, %d, %d\n", proces, podaci->broj[proces], podaci->najveci);
+    podaci->trazim[i] = 1;
+
+    podaci->broj[i] = max();
+    
+    podaci->trazim[i] = 0;
+    
+    printf("%d, %d, %d, %d\n", i, podaci->trazim[i], podaci->broj[i], podaci->najveci);
+sleep(1);
     for (int j = 0; j < procesi; j++)
     {
-        while (podaci->ulaz[j] == 1)
-            ;
-        while ((podaci->broj[j] != 0) && ((podaci->broj[j] < podaci->broj[proces]) || ((podaci->broj[j] == podaci->broj[proces]) && j < proces)))
-            ;
+        while (podaci->trazim[j] != 0);
+        while ((podaci->broj[j] != 0) && ((podaci->broj[j] < podaci->broj[i]) || ((podaci->broj[j] == podaci->broj[i]) && j < i)));
     }
 }
 
-void izl_k_o(int proces)
+void izl_k_o(int i)
 {
-    podaci->broj[proces] = 0;
+    podaci->broj[i] = 0;
 }
 
 int main(int argc, char *argv[])
@@ -68,9 +73,8 @@ int main(int argc, char *argv[])
 
     procesi = atoi(argv[1]);
 
-    podaci->ulaz = new int[procesi];
+    podaci->trazim = new int[procesi];
     podaci->broj = new int[procesi];
-    podaci->najveci = 0;
 
     sigset(SIGINT, prekid);
 
@@ -88,8 +92,8 @@ int main(int argc, char *argv[])
                     printf("Proces: %d, K.O. br: %d (%d/5)\n", i + 1, k + 1, m + 1);
                     sleep(1);
                 }
-                izl_k_o(i);
-            }
+            }            
+            izl_k_o(i);
             exit(0);
         }
         case -1:
