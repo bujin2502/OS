@@ -1,15 +1,19 @@
 #include <iostream>
+#include <cstdlib>
+#include <sys/types.h>
+#include <unistd.h>
+#include <wait.h>
 #include <signal.h>
 #include <sys/shm.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#include <sys/ipc.h>
+#include <stdlib.h>
 
 using namespace std;
 
 struct zajednicki
 {
-    int *trazim;
-    int *broj;
+    int trazim[10];
+    int broj[10];
     int najveci;
 };
 
@@ -28,28 +32,24 @@ void prekid(int sig)
     exit(0);
 }
 
-int max () {
-    int zadnji = 0;
-	for(int i = 0; i < procesi; i++){
-		if(podaci->broj[i] > zadnji) zadnji = podaci->broj[i];
-	}
-	return zadnji + 1;
-}
-
 void k_o(int i)
 {
     podaci->trazim[i] = 1;
-
-    podaci->broj[i] = max();
-    
+    for (int z = 0; z < procesi; z++)
+    {
+        if (podaci->broj[z] > podaci->najveci)
+        {
+            podaci->najveci = podaci->broj[z];
+        }
+    }
+    podaci->broj[i] = podaci->najveci + 1;
     podaci->trazim[i] = 0;
-    
-    printf("%d, %d, %d, %d\n", i, podaci->trazim[i], podaci->broj[i], podaci->najveci);
-sleep(1);
     for (int j = 0; j < procesi; j++)
     {
-        while (podaci->trazim[j] != 0);
-        while ((podaci->broj[j] != 0) && ((podaci->broj[j] < podaci->broj[i]) || ((podaci->broj[j] == podaci->broj[i]) && j < i)));
+        while (podaci->trazim[j] != 0)
+            ;
+        while ((podaci->broj[j] != 0) && ((podaci->broj[j] < podaci->broj[i]) || ((podaci->broj[j] == podaci->broj[i]) && j < i)))
+            ;
     }
 }
 
@@ -73,8 +73,10 @@ int main(int argc, char *argv[])
 
     procesi = atoi(argv[1]);
 
-    podaci->trazim = new int[procesi];
-    podaci->broj = new int[procesi];
+    /*     podaci->trazim = new int[10];
+        podaci->broj = new int[10]; */
+
+    podaci->najveci = 0;
 
     sigset(SIGINT, prekid);
 
@@ -84,6 +86,7 @@ int main(int argc, char *argv[])
         {
         case 0:
         {
+
             for (int k = 0; k < 5; k++)
             {
                 k_o(i);
@@ -92,8 +95,8 @@ int main(int argc, char *argv[])
                     printf("Proces: %d, K.O. br: %d (%d/5)\n", i + 1, k + 1, m + 1);
                     sleep(1);
                 }
-            }            
-            izl_k_o(i);
+                izl_k_o(i);
+            }
             exit(0);
         }
         case -1:
