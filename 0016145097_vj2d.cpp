@@ -1,27 +1,25 @@
 #include <iostream>
 #include <cstdlib>
-#include <sys/types.h>
 #include <unistd.h>
-#include <wait.h>
+#include <sys/wait.h>
 #include <signal.h>
 #include <sys/shm.h>
 #include <sys/ipc.h>
-#include <stdlib.h>
 
 using namespace std;
 
 struct zajednicki
 {
+    int najveci;
     int trazim[10];
     int broj[10];
-    int najveci;
 };
 
 zajednicki *podaci;
 
 int procesi;
 
-key_t id_dijeljena_memorija;
+int id_dijeljena_memorija;
 
 void prekid(int sig)
 {
@@ -73,9 +71,6 @@ int main(int argc, char *argv[])
 
     procesi = atoi(argv[1]);
 
-    /*     podaci->trazim = new int[10];
-        podaci->broj = new int[10]; */
-
     podaci->najveci = 0;
 
     sigset(SIGINT, prekid);
@@ -86,7 +81,6 @@ int main(int argc, char *argv[])
         {
         case 0:
         {
-
             for (int k = 0; k < 5; k++)
             {
                 k_o(i);
@@ -97,7 +91,7 @@ int main(int argc, char *argv[])
                 }
                 izl_k_o(i);
             }
-            exit(0);
+            return 0;
         }
         case -1:
         {
@@ -106,6 +100,5 @@ int main(int argc, char *argv[])
         }
         }
     }
-
     prekid(0);
 }
