@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
         }
         case -1:
         {
-            cout << "Fatalna pogreška!\n";
+            cout << "Fatalna greska!\n";
             exit(1);
         }
         }
