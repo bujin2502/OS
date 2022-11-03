@@ -18,13 +18,14 @@ struct slog_ulaz
     int br_dret;
     long double *polje;
     long double *izlaz;
-
-} * ulaz;
+};
+slog_ulaz *ulaz;
 
 void prekid(int sig)
 {
     for (int i = 0; i < ulaz->br_dret; i++)
         pthread_join(polje_dretvi[i], NULL);
+    delete ulaz;
     exit(0);
 }
 
@@ -100,6 +101,8 @@ int main(int argc, char **argv)
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
     }
 
+    usleep(1000);
+
     printf("\nEksponencijale =\n");
 
     int brojac = ulaz->br_elem;
@@ -107,5 +110,6 @@ int main(int argc, char **argv)
     {
         printf("%17.11Lf\n", ulaz->izlaz[k]);
     }
+
     prekid(0);
 }
