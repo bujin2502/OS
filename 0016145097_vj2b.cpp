@@ -13,18 +13,18 @@ pthread_t *polje_dretvi;
 
 struct slog_ulaz
 {
-    long double *polje;
-    long double *izlaz;
     int br_elem;
     int m;
     int br_dret;
+    long double *polje;
+    long double *izlaz;
+
 } * ulaz;
 
 void prekid(int sig)
 {
     for (int i = 0; i < ulaz->br_dret; i++)
         pthread_join(polje_dretvi[i], NULL);
-
     exit(0);
 }
 
@@ -74,9 +74,9 @@ int main(int argc, char **argv)
     }
 
     ulaz = new slog_ulaz;
-    ulaz->br_elem = atoi(argv[1]); // broj elemenata polja - l
-    ulaz->m = atoi(argv[2]);       // broj iteracija - m
-    ulaz->br_dret = atoi(argv[3]); // broj dretvi - n
+    ulaz->br_elem = atoi(argv[1]);
+    ulaz->m = atoi(argv[2]);
+    ulaz->br_dret = atoi(argv[3]);
     ulaz->polje = new long double[ulaz->br_elem];
     ulaz->izlaz = new long double[ulaz->br_elem];
 
@@ -99,8 +99,6 @@ int main(int argc, char **argv)
         polje_i[i] = i;
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
     }
-
-    sleep(1);
 
     printf("\nEksponencijale =\n");
 
