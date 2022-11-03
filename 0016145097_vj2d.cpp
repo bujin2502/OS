@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
                 }
                 izl_k_o(i);
             }
-            return 0;
+            exit(0);
         }
         case -1:
         {
