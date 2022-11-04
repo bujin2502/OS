@@ -11,8 +11,8 @@ using namespace std;
 struct zajednicki
 {
     int najveci;
-    int trazim[10];
-    int broj[10];
+    int *trazim;
+    int *broj;
 };
 
 zajednicki *podaci;
@@ -33,6 +33,7 @@ void prekid(int sig)
 void k_o(int i)
 {
     podaci->trazim[i] = 1;
+    printf("Nesto\n");
     for (int z = 0; z < procesi; z++)
     {
         if (podaci->broj[z] > podaci->najveci)
@@ -65,7 +66,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    id_dijeljena_memorija = shmget(IPC_PRIVATE, sizeof(zajednicki), 0600);
+    id_dijeljena_memorija = shmget(IPC_PRIVATE, sizeof(zajednicki) * 10, 0600);
 
     podaci = (zajednicki *)shmat(id_dijeljena_memorija, NULL, 0);
 
@@ -81,9 +82,12 @@ int main(int argc, char *argv[])
         {
         case 0:
         {
+
             for (int k = 0; k < 5; k++)
             {
+
                 k_o(i);
+
                 for (int m = 0; m < 5; m++)
                 {
                     printf("Proces: %d, K.O. br: %d (%d/5)\n", i + 1, k + 1, m + 1);
