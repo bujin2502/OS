@@ -8,53 +8,47 @@
 
 using namespace std;
 
-struct zajednicki
-{
-    int najveci;
-    int *trazim;
-    int *broj;
-};
+int *najveci, *trazim, *broj;
 
-zajednicki *podaci;
-
-int procesi;
-
-int id_dijeljena_memorija;
+int procesi, id_dijeljena_memorija;
 
 void prekid(int sig)
 {
     for (int i = 0; i < procesi; i++)
         wait(NULL);
-    shmdt(podaci);
+    shmdt(trazim);
+    shmdt(broj);
     shmctl(id_dijeljena_memorija, IPC_RMID, NULL);
     exit(0);
 }
 
 void k_o(int i)
 {
-    podaci->trazim[i] = 1;
-    printf("Nesto\n");
+    trazim[i] = 1;
+    broj[i] = 0;
     for (int z = 0; z < procesi; z++)
     {
-        if (podaci->broj[z] > podaci->najveci)
+        if (broj[z] > *najveci)
         {
-            podaci->najveci = podaci->broj[z];
+            *najveci = broj[z];
         }
     }
-    podaci->broj[i] = podaci->najveci + 1;
-    podaci->trazim[i] = 0;
+    broj[i] = *najveci + 1;
+    trazim[i] = 0;
+
     for (int j = 0; j < procesi; j++)
     {
-        while (podaci->trazim[j] != 0)
+        while (trazim[j] != 0)
             ;
-        while ((podaci->broj[j] != 0) && ((podaci->broj[j] < podaci->broj[i]) || ((podaci->broj[j] == podaci->broj[i]) && j < i)))
+
+        while ((broj[j] != 0) && ((broj[j] < broj[i]) || ((broj[j] == broj[i]) && j < i)))
             ;
     }
 }
 
 void izl_k_o(int i)
 {
-    podaci->broj[i] = 0;
+    broj[i] = 0;
 }
 
 int main(int argc, char *argv[])
@@ -66,13 +60,19 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    id_dijeljena_memorija = shmget(IPC_PRIVATE, sizeof(zajednicki) * 10, 0600);
-
-    podaci = (zajednicki *)shmat(id_dijeljena_memorija, NULL, 0);
-
     procesi = atoi(argv[1]);
 
-    podaci->najveci = 0;
+    id_dijeljena_memorija = shmget(IPC_PRIVATE, sizeof(int) + sizeof(int) * procesi * 2, 0600);
+
+    trazim = new int[procesi];
+    broj = new int[procesi];
+
+    najveci = new int;
+    najveci = 0;
+
+    trazim = (int *)shmat(id_dijeljena_memorija, NULL, 0);
+    broj = (int *)shmat(id_dijeljena_memorija, NULL, 0);
+    najveci = (int *)shmat(id_dijeljena_memorija, NULL, 0);
 
     sigset(SIGINT, prekid);
 
@@ -82,12 +82,9 @@ int main(int argc, char *argv[])
         {
         case 0:
         {
-
             for (int k = 0; k < 5; k++)
             {
-
                 k_o(i);
-
                 for (int m = 0; m < 5; m++)
                 {
                     printf("Proces: %d, K.O. br: %d (%d/5)\n", i + 1, k + 1, m + 1);
