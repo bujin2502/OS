@@ -16,6 +16,7 @@ void prekid(int sig)
 {
     for (int i = 0; i < procesi; i++)
         wait(NULL);
+        shmdt(najveci);
     shmdt(trazim);
     shmdt(broj);
     shmctl(id_dijeljena_memorija, IPC_RMID, NULL);
