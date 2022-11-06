@@ -1,5 +1,5 @@
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
 #include <csignal>
@@ -42,12 +42,17 @@ long double faktorijel(int m)
 void *dretva(void *arg)
 {
     int i = *((int *)arg);
-    int broj = ulaz->br_elem / ulaz->br_dret;
-    int mod = ulaz->br_elem % ulaz->br_dret;
+
+    double a = double(ulaz->br_elem);
+    double b = double(ulaz->br_dret);
+
+    double broj = ceil(a / b);
+
     int prec = ulaz->m;
     int start = broj * i;
     int kraj = start + broj;
-    if (start == ulaz->br_elem - broj - mod)
+
+    if (kraj > ulaz->br_elem)
     {
         kraj = ulaz->br_elem;
     }
