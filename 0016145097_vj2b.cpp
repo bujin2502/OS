@@ -106,7 +106,7 @@ int main(int argc, char **argv)
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
     }
 
-    usleep(1000);
+    usleep(500);
 
     printf("\nEksponencijale =\n");
 
