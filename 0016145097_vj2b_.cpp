@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
-#include <ctime>
 #include <csignal>
 #include <pthread.h>
 #include <stdio.h>
@@ -58,20 +57,15 @@ void *dretva(void *arg)
     }
 
     srand(time(0));
-
-    for (int l = start; l < kraj; l++)
+    for (int i = start; i < kraj; i++)
     {
-        ulaz->polje[l] = (long double)rand() / (RAND_MAX - 1) * 10;
-    }
-
-        for (int l = start; l < kraj; l++)
-    {
+        ulaz->polje[i] = (long double)rand() / (RAND_MAX - 1) * 10;
         long double rez = 0;
         for (int z = 0; z < prec; z++)
         {
-            rez += pow(ulaz->polje[l], z) / faktorijel(z);
+            rez += pow(ulaz->polje[i], z) / faktorijel(z);
         }
-        ulaz->izlaz[l] = rez;
+        ulaz->izlaz[i] = rez;
     }
     pthread_exit(arg);
 }
@@ -105,9 +99,10 @@ int main(int argc, char **argv)
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
     }
 
-usleep(1000);
+    for (int i = 0; i < ulaz->br_dret; i++)
+        pthread_join(polje_dretvi[i], NULL);
 
-    printf("\nEksponenti = \n");
+    printf("Eksponenti = \n");
     for (int i = 0; i < ulaz->br_elem; i++)
     {
         printf("%17.11Lf\n", ulaz->polje[i]);
@@ -119,5 +114,6 @@ usleep(1000);
         printf("%17.11Lf\n", ulaz->izlaz[k]);
     }
 
-    prekid(0);
+    delete ulaz;
+    return 0;
 }
