@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
-#include <ctime>
+#include <time.h>
 #include <csignal>
 #include <pthread.h>
 #include <stdio.h>
@@ -10,6 +10,7 @@
 using namespace std;
 
 pthread_t *polje_dretvi;
+int *polje_i;
 
 struct slog_ulaz
 {
@@ -26,6 +27,8 @@ void prekid(int sig)
     for (int i = 0; i < ulaz->br_dret; i++)
         pthread_join(polje_dretvi[i], NULL);
     delete ulaz;
+    delete[] polje_dretvi;
+    delete[] polje_i;
     exit(0);
 }
 
@@ -41,6 +44,7 @@ long double faktorijel(int m)
 
 void *dretva(void *arg)
 {
+
     int i = *((int *)arg);
 
     double a = double(ulaz->br_elem);
@@ -56,15 +60,15 @@ void *dretva(void *arg)
     {
         kraj = ulaz->br_elem;
     }
-
-    for (int l = start; l < kraj; l++)
+    for (int i = start; i < kraj; i++)
     {
+        ulaz->polje[i] = (long double)rand() / (RAND_MAX - 1) * 10;
         long double rez = 0;
         for (int z = 0; z < prec; z++)
         {
-            rez += pow(ulaz->polje[l], z) / faktorijel(z);
+            rez += pow(ulaz->polje[i], z) / faktorijel(z);
         }
-        ulaz->izlaz[l] = rez;
+        ulaz->izlaz[i] = rez;
     }
     pthread_exit(arg);
 }
@@ -88,17 +92,11 @@ int main(int argc, char **argv)
 
     polje_dretvi = new pthread_t[ulaz->br_dret];
 
-    sigset(SIGINT, prekid);
+    polje_i = new int[ulaz->br_dret];
 
     srand(time(0));
-    printf("Eksponenti = \n");
-    for (int i = 0; i < ulaz->br_elem; i++)
-    {
-        ulaz->polje[i] = (long double)rand() / (RAND_MAX - 1) * 10;
-        printf("%17.11Lf\n", ulaz->polje[i]);
-    }
 
-    int *polje_i = new int[ulaz->br_dret];
+    sigset(SIGINT, prekid);
 
     for (int i = 0; i < ulaz->br_dret; i++)
     {
@@ -106,15 +104,23 @@ int main(int argc, char **argv)
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
     }
 
-    usleep(1000);
+    for (int i = 0; i < ulaz->br_dret; i++)
+        pthread_join(polje_dretvi[i], NULL);
+
+    printf("Eksponenti = \n");
+    for (int i = 0; i < ulaz->br_elem; i++)
+    {
+        printf("%17.11Lf\n", ulaz->polje[i]);
+    }
 
     printf("\nEksponencijale =\n");
-
-    int brojac = ulaz->br_elem;
-    for (int k = 0; k < brojac; k++)
+    for (int k = 0; k < ulaz->br_elem; k++)
     {
         printf("%17.11Lf\n", ulaz->izlaz[k]);
     }
 
-    prekid(0);
+    delete ulaz;
+    delete[] polje_dretvi;
+    delete[] polje_i;
+    return 0;
 }
