@@ -6,19 +6,23 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 
+#include <stdio.h>
+
 using namespace std;
 
-int *najveci, *trazim, *broj;
+int *najveci;
+int *trazim;
+int *broj;
 
-int procesi, id_dijeljena_memorija;
+int procesi;
+
+int id_dijeljena_memorija;
 
 void prekid(int sig)
 {
     for (int i = 0; i < procesi; i++)
         wait(NULL);
-        shmdt(najveci);
-    shmdt(trazim);
-    shmdt(broj);
+    shmdt(najveci);
     shmctl(id_dijeljena_memorija, IPC_RMID, NULL);
     exit(0);
 }
@@ -26,7 +30,6 @@ void prekid(int sig)
 void k_o(int i)
 {
     trazim[i] = 1;
-    broj[i] = 0;
     for (int z = 0; z < procesi; z++)
     {
         if (broj[z] > *najveci)
@@ -34,6 +37,7 @@ void k_o(int i)
             *najveci = broj[z];
         }
     }
+
     broj[i] = *najveci + 1;
     trazim[i] = 0;
 
@@ -41,7 +45,6 @@ void k_o(int i)
     {
         while (trazim[j] != 0)
             ;
-
         while ((broj[j] != 0) && ((broj[j] < broj[i]) || ((broj[j] == broj[i]) && j < i)))
             ;
     }
@@ -63,17 +66,19 @@ int main(int argc, char *argv[])
 
     procesi = atoi(argv[1]);
 
-    id_dijeljena_memorija = shmget(IPC_PRIVATE, sizeof(int) + sizeof(int) * procesi * 2, 0600);
+    id_dijeljena_memorija = shmget(IPC_PRIVATE, (sizeof(int) + sizeof(int) * 2 * procesi), 0600);
 
-    trazim = new int[procesi];
-    broj = new int[procesi];
-
-    najveci = new int;
-    najveci = 0;
-
-    trazim = (int *)shmat(id_dijeljena_memorija, NULL, 0);
-    broj = (int *)shmat(id_dijeljena_memorija, NULL, 0);
     najveci = (int *)shmat(id_dijeljena_memorija, NULL, 0);
+    trazim = najveci + 1;
+    broj = trazim + procesi;
+
+    *najveci = 0;
+
+    for (int i = 0; i < procesi; i++)
+    {
+        broj[i] = 0;
+        trazim[i] = 0;
+    }
 
     sigset(SIGINT, prekid);
 
