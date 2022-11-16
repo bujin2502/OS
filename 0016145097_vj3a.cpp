@@ -6,9 +6,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
-
 #include <semaphore.h>
-#include <sys/sem.h>
 
 using namespace std;
 
@@ -136,7 +134,6 @@ void *dretva(void *arg)
     }
     break;
     }
-
     pthread_exit(arg);
 }
 
@@ -163,10 +160,10 @@ int main()
         pthread_create(&polje_dretvi[i], NULL, dretva, &polje_i[i]);
     }
 
-    sigset(SIGINT, prekid);
-
     for (int i = 0; i < 7; i++)
         pthread_join(polje_dretvi[i], NULL);
+
+    sigset(SIGINT, prekid);
 
     sem_destroy(&sem_0);
     sem_destroy(&sem_1);
