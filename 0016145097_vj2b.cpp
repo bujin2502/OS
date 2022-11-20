@@ -96,8 +96,6 @@ int main(int argc, char **argv)
 
     srand(time(0));
 
-    sigset(SIGINT, prekid);
-
     for (int i = 0; i < ulaz->br_dret; i++)
     {
         polje_i[i] = i;
@@ -106,7 +104,9 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < ulaz->br_dret; i++)
         pthread_join(polje_dretvi[i], NULL);
-
+    
+    sigset(SIGINT, prekid);
+    
     printf("Eksponenti = \n");
     for (int i = 0; i < ulaz->br_elem; i++)
     {
