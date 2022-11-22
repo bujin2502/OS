@@ -1,8 +1,8 @@
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <signal.h>
 #include <stdio.h>
-#include <time.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/shm.h>
@@ -76,24 +76,23 @@ int main(int argc, char *argv[])
     pokazivac->ULAZ = 0;
     pokazivac->IZLAZ = 0;
 
-    srand(time(0));
-
     for (int i = 0; i < broj_proizvodjaca; i++)
     {
         if (fork() == 0)
         {
             for (int z = 0; z < pokazivac->UKUPNO; z++)
             {
+                srand(time(NULL));
                 ispitaj_sem(0);
                 ispitaj_sem(1);
                 pokazivac->M[pokazivac->ULAZ] = (long double)rand() / (RAND_MAX - 1) * 1000;
-                printf("Proizvodjac %d salje %d\n", i + 1, pokazivac->M[pokazivac->ULAZ]);
+                printf("Proizvodjac %d salje \"%d\"\n", i + 1, pokazivac->M[pokazivac->ULAZ]);
                 sleep(1);
                 pokazivac->ULAZ = (pokazivac->ULAZ + 1) % 5;
                 postavi_sem(1);
                 postavi_sem(2);
             }
-            printf("Proizvodjac %d je zavrsio sa slanjem\n", i + 1);
+            printf("Proizvodjac %d je zavrsio sa slanjem.\n", i + 1);
             exit(0);
         }
     }
