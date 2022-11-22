@@ -113,5 +113,7 @@ int main(int argc, char *argv[])
         printf("Potrosac - zbroj primljenih brojeva = %d\n", zbroj);
         exit(0);
     }
+    for (int i = 0; i < broj_proizvodjaca; i++)
+        wait(NULL);
     prekid(0);
 }
