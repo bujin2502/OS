@@ -1,14 +1,14 @@
-#include <cstdlib>
-#include <ctime>
+#include <cstdlib>      //atoi, rand, srand
+#include <ctime>        //time
 #include <iostream>
 #include <signal.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/shm.h>
-#include <sys/ipc.h>
-#include <sys/types.h>
-#include <sys/sem.h>
+#include <stdio.h>      //printf
+#include <unistd.h>     //sleep
+#include <sys/wait.h>   //wait
+#include <sys/shm.h>    //shmget ...
+#include <sys/ipc.h>    //semget ...
+#include <sys/types.h>  // semget ...
+#include <sys/sem.h>    //semget ...
 
 using namespace std;
 
@@ -49,6 +49,13 @@ void prekid(int sig)
     exit(0);
 }
 
+long double slucajan_broj()
+{
+    srand(time(NULL));
+    long double r = (long double)rand() / (RAND_MAX - 1) * 1000;
+    return r;
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 3)
@@ -57,6 +64,8 @@ int main(int argc, char *argv[])
         printf("Ovaj program mora primiti dva argumenta - broj proizvodjaca i slucajnih brojeva!\n");
         return 0;
     }
+
+    system("clear");
 
     broj_proizvodjaca = atoi(argv[1]);
     broj_brojeva = atoi(argv[2]);
@@ -82,10 +91,9 @@ int main(int argc, char *argv[])
         {
             for (int z = 0; z < pokazivac->UKUPNO; z++)
             {
-                srand(time(NULL));
                 ispitaj_sem(0);
                 ispitaj_sem(1);
-                pokazivac->M[pokazivac->ULAZ] = (long double)rand() / (RAND_MAX - 1) * 1000;
+                pokazivac->M[pokazivac->ULAZ] = slucajan_broj();
                 printf("Proizvodjac %d salje \"%d\"\n", i + 1, pokazivac->M[pokazivac->ULAZ]);
                 sleep(1);
                 pokazivac->ULAZ = (pokazivac->ULAZ + 1) % 5;
@@ -104,7 +112,6 @@ int main(int argc, char *argv[])
         {
             ispitaj_sem(2);
             printf("Potrosac prima %d\n", pokazivac->M[pokazivac->IZLAZ]);
-            sleep(1);
             zbroj += pokazivac->M[pokazivac->IZLAZ];
             pokazivac->IZLAZ = (pokazivac->IZLAZ + 1) % 5;
             postavi_sem(0);
