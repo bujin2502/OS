@@ -5,17 +5,17 @@
 
 using namespace std;
 
+pthread_t *dretva_veletrgovac;
+
 pthread_t *polje_dretvi_nakupac;
 int *polje_dr_nakupac;
 int broj_nakupaca = 3;
 
-pthread_t *dretva_veletrgovac;
+pthread_mutex_t mutex_veletrgovac;
+pthread_mutex_t mutex_nakupac;
 
-pthread_mutex_t mutex1;
-pthread_mutex_t mutex2;
-
-pthread_cond_t uvjet[3];
 pthread_cond_t uvjet_veletrgovac;
+pthread_cond_t uvjet_nakupac[3];
 
 bool moze;
 int komplet[2];
@@ -34,10 +34,10 @@ void *veletrgovac(void *z)
 {
     while (true)
     {
-        pthread_mutex_lock(&mutex1);
+        pthread_mutex_lock(&mutex_veletrgovac);
         while (moze)
         {
-            pthread_cond_wait(&uvjet_veletrgovac, &mutex1);
+            pthread_cond_wait(&uvjet_veletrgovac, &mutex_veletrgovac);
         };
         stvori_ponudu();
         if ((komplet[0] == 0 && komplet[1] == 1) || (komplet[0] == 1 && komplet[1] == 0))
@@ -59,8 +59,8 @@ void *veletrgovac(void *z)
             sleep(1);
         }
         moze = true;
-        pthread_cond_signal(&uvjet[broj]);
-        pthread_mutex_unlock(&mutex1);
+        pthread_cond_signal(&uvjet_nakupac[broj]);
+        pthread_mutex_unlock(&mutex_veletrgovac);
     }
     pthread_exit(z);
 }
@@ -70,10 +70,10 @@ void *nakupac(void *z)
     int i = *(int *)z;
     while (true)
     {
-        pthread_mutex_lock(&mutex2);
+        pthread_mutex_lock(&mutex_nakupac);
         while (!moze)
         {
-            pthread_cond_wait(&uvjet[i], &mutex2);
+            pthread_cond_wait(&uvjet_nakupac[i], &mutex_nakupac);
         };
         switch (i)
         {
@@ -93,19 +93,19 @@ void *nakupac(void *z)
         sleep(1);
         moze = false;
         pthread_cond_signal(&uvjet_veletrgovac);
-        pthread_mutex_unlock(&mutex2);
+        pthread_mutex_unlock(&mutex_nakupac);
     };
     pthread_exit(z);
 }
 
 void prekid(int sig)
 {
-    pthread_mutex_destroy(&mutex1);
-    pthread_mutex_destroy(&mutex2);
+    pthread_mutex_destroy(&mutex_veletrgovac);
+    pthread_mutex_destroy(&mutex_nakupac);
     pthread_cond_destroy(&uvjet_veletrgovac);
     for (int x = 0; x < 3; x++)
     {
-        pthread_cond_destroy(&uvjet[x]);
+        pthread_cond_destroy(&uvjet_nakupac[x]);
     }
     delete[] polje_dretvi_nakupac;
     delete[] dretva_veletrgovac;
@@ -118,11 +118,11 @@ int main()
     system("clear");
     srand(time(NULL));
 
-    pthread_mutex_init(&mutex1, NULL);
-    pthread_mutex_init(&mutex2, NULL);
+    pthread_mutex_init(&mutex_veletrgovac, NULL);
+    pthread_mutex_init(&mutex_nakupac, NULL);
     for (int x = 0; x < 3; x++)
     {
-        pthread_cond_init(&uvjet[x], NULL);
+        pthread_cond_init(&uvjet_nakupac[x], NULL);
     }
     pthread_cond_init(&uvjet_veletrgovac, NULL);
 
