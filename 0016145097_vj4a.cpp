@@ -5,8 +5,8 @@
 using namespace std;
 
 pthread_mutex_t mutex;
-pthread_t *polje_dretvi;
 pthread_cond_t uvjet;
+pthread_t *polje_dretvi;
 int *polje_i;
 int broj_dretvi;
 int broj_unesenih = 0;
@@ -16,7 +16,7 @@ void *dretva(void *z)
     int i = *(int *)z;
     pthread_mutex_lock(&mutex);
     int broj;
-    printf("Dretva broj: %d. Unesi broj: ", i + 1);
+    printf("Dretva broj %d - unesi broj: ", i + 1);
     cin >> broj;
     broj_unesenih++;
     if (broj_unesenih < broj_dretvi)
@@ -27,7 +27,7 @@ void *dretva(void *z)
     {
         pthread_cond_broadcast(&uvjet);
     }
-    printf("Unesen broj: %d u dretvu: %d\n", broj, i + 1);
+    printf("U dretvu %d je unešen broj: %d\n", i + 1,broj);
     pthread_mutex_unlock(&mutex);
     pthread_exit(z);
 }
