@@ -11,8 +11,7 @@ pthread_t *polje_dretvi_nakupac;
 int *polje_dr_nakupac;
 int broj_nakupaca = 3;
 
-pthread_mutex_t mutex_veletrgovac;
-pthread_mutex_t mutex_nakupac;
+pthread_mutex_t mutex;
 
 pthread_cond_t uvjet_veletrgovac;
 pthread_cond_t uvjet_nakupac[3];
@@ -34,33 +33,33 @@ void *veletrgovac(void *z)
 {
     while (true)
     {
-        pthread_mutex_lock(&mutex_veletrgovac);
+        pthread_mutex_lock(&mutex);
         while (moze)
         {
-            pthread_cond_wait(&uvjet_veletrgovac, &mutex_veletrgovac);
+            pthread_cond_wait(&uvjet_veletrgovac, &mutex);
         };
+        pthread_mutex_unlock(&mutex);
         stvori_ponudu();
         if ((komplet[0] == 0 && komplet[1] == 1) || (komplet[0] == 1 && komplet[1] == 0))
         {
             broj = 0;
             printf("Veletrgovac stavio monitor i tipkovnicu\n");
-            sleep(1);
         }
         else if ((komplet[0] == 0 && komplet[1] == 2) || (komplet[0] == 2 && komplet[1] == 0))
         {
             broj = 1;
             printf("Veletrgovac stavio tipkovnicu i racunalo\n");
-            sleep(1);
         }
         else if ((komplet[0] == 1 && komplet[1] == 2) || (komplet[0] == 2 && komplet[1] == 1))
         {
             broj = 2;
             printf("Veletrgovac stavio racunalo i monitor\n");
-            sleep(1);
         }
         moze = true;
+        pthread_mutex_lock(&mutex);
         pthread_cond_signal(&uvjet_nakupac[broj]);
-        pthread_mutex_unlock(&mutex_veletrgovac);
+        sleep(1);
+        pthread_mutex_unlock(&mutex);
     }
     pthread_exit(z);
 }
@@ -70,38 +69,37 @@ void *nakupac(void *z)
     int i = *(int *)z;
     while (true)
     {
-        pthread_mutex_lock(&mutex_nakupac);
+        pthread_mutex_lock(&mutex);
         while (!moze)
         {
-            pthread_cond_wait(&uvjet_nakupac[i], &mutex_nakupac);
+            pthread_cond_wait(&uvjet_nakupac[i], &mutex);
         };
+        pthread_mutex_unlock(&mutex);
         switch (i)
         {
         case 0:
             printf("Nakupac s racunalima uzeo monitor i tipkovnicu\n");
-            sleep(1);
             break;
         case 1:
             printf("Nakupac s monitorima uzeo tipkovnicu i racunalo\n");
-            sleep(1);
             break;
         case 2:
             printf("Nakupac s tipkovnicama uzeo racunalo i monitor\n");
-            sleep(1);
             break;
         }
-        sleep(1);
+
         moze = false;
+        pthread_mutex_lock(&mutex);
         pthread_cond_signal(&uvjet_veletrgovac);
-        pthread_mutex_unlock(&mutex_nakupac);
+        sleep(1);
+        pthread_mutex_unlock(&mutex);
     };
     pthread_exit(z);
 }
 
 void prekid(int sig)
 {
-    pthread_mutex_destroy(&mutex_veletrgovac);
-    pthread_mutex_destroy(&mutex_nakupac);
+    pthread_mutex_destroy(&mutex);
     pthread_cond_destroy(&uvjet_veletrgovac);
     for (int x = 0; x < 3; x++)
     {
@@ -118,8 +116,7 @@ int main()
     system("clear");
     srand(time(NULL));
 
-    pthread_mutex_init(&mutex_veletrgovac, NULL);
-    pthread_mutex_init(&mutex_nakupac, NULL);
+    pthread_mutex_init(&mutex, NULL);
     for (int x = 0; x < 3; x++)
     {
         pthread_cond_init(&uvjet_nakupac[x], NULL);
